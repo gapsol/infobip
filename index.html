@@ -1,0 +1,36 @@
+<html>
+
+<head>
+    <title>Infobip URL shortener</title>
+    <meta charset="UTF-8">
+    <link href="./fe/shorten.css" rel="stylesheet" />
+    <script src="./fe/shorten.js"></script>
+</head>
+
+<body onload="init()">
+    <h3 id="head-info" class="hidden"></h3>
+
+    <form id="shortenForm" class="hidden">
+        <input type="text" name="url" id="url" placeholder="URL" />
+        <input type="button" id="url-btn" role="request" value="shorten">
+        <div id="url-info" class="hidden"></div>
+        <p></p>
+        <input type="text" name="surl" id="surl" placeholder="Shortened URL" disabled /><br />
+        <input type="button" id="surl-btn" role="copy" onclick="copyUrl(this.form)" value="copy">
+        <div id="surl-info" class="hidden"></div>
+    </form>
+
+    <div id="stats-info" class="hidden">Stats:
+        <ul>
+            <li>script used: <span id="s-used"></span></li>
+            <li>new url saved: <span id="s-saved"></span></li>
+            <li>saving existing url: <span id="s-existing"></span></li>
+            <li>invalid url: <span id="s-invalid"></span></li>
+            <li>redirected to origin url: <span id="s-redirected"></span></li>
+            <li>url not found": <span id="s-notfound"></span></li>
+            <li>badrequest: <span id="s-badrequest"></span></li>
+        </ul>
+    </div>
+</body>
+
+</html>

@@ -1,53 +1,132 @@
 <?php
 
+class Stats
+{
+    private $stats = NULL;
+    private $stats_file = '../data/stats.json';
+
+    public function stats_load()
+    {
+        if (file_exists($this->stats_file)) {
+            $json = file_get_contents($this->stats_file);
+            $this->stats = json_decode($json);
+        } else {
+            $this->stats->used = 0;
+            $this->stats->saved = 0;
+            $this->stats->existing = 0;
+            $this->stats->invalid = 0;
+            $this->stats->redirected = 0;
+            $this->stats->notfound = 0;
+            $this->stats->badrequest = 0;
+            $this->stats_update();
+        }
+    }
+
+    public function stats_used_update()
+    {
+        $this->stats->used++;
+        $this->stats_update();
+    }
+    public function stats_saved_update()
+    {
+        $this->stats->saved++;
+        $this->stats_update();
+    }
+    public function stats_existing_update()
+    {
+        $this->stats->existing++;
+        $this->stats_update();
+    }
+    public function stats_invalid_update()
+    {
+        $this->stats->invalid++;
+        $this->stats_update();
+    }
+    public function stats_redirected_update()
+    {
+        $this->stats->redirected++;
+        $this->stats_update();
+    }
+    public function stats_notfound_update()
+    {
+        $this->stats->notfound++;
+        $this->stats_update();
+    }
+    public function stats_badrequest_update()
+    {
+        $this->stats->badrequest++;
+        $this->stats_update();
+    }
+
+    private function stats_update()
+    {
+        file_put_contents($this->stats_file, json_encode($this->stats));
+    }
+}
+
+$stats = new Stats();
+$stats->stats_load();
+
 if ($_REQUEST) {
-    $json = file_get_contents('../data/shorten.json');
-    $obj = json_decode($json);
-    $url_prefix = 'https://shortened.url/?id=';
+    $stats->stats_used_update();
+
+    require('../config.php');
+    $short_list = '../data/shorten.json';
+    if (file_exists($short_list)) {
+        $json = file_get_contents($short_list);
+        $obj = json_decode($json);
+    } else {
+        file_put_contents($short_list, null);
+    }
+
+    // trailing slash removal
+    if (strrpos($url_base, '/') === strlen($url_base) - 1) {
+        $url_base = substr($url_base, 0, strlen($url_base) - 1);
+    }
+    $url_prefix = $url_base . '/?id=';
     $message = '';
 
     if (isset($_REQUEST['url'])) { // shorten url
-        echo 'ORIGINAL 2 SHORTEN<br>';
-        echo 'URL: ' . $_REQUEST['url'] . '<br>';
+        // regex for URL validation
         $rex = "/^https?:\\/\\/(?:www\\.)?[-a-zA-Z0-9@:%._\\+~#=]{1,256}\\.[a-zA-Z0-9()]{1,6}\\b(?:[-a-zA-Z0-9()@:%_\\+.~#?&\\/=]*)$/";
         if (!preg_match($rex, $_REQUEST['url'])) {
+            $stats->stats_invalid_update();
+
             http_response_code(400);
             $j['status'] = 'error';
-            $j['message'] = 'invalid URL';
+            $j['message'] = 'Invalid URL';
             $j['data'] = '';
             print json_encode($j);
             exit;
         }
-        // test existing url
-        $url_exists = false;
-        // get highest id
-        $max_id = 0;
 
+        $url_exists = false;
+        $max_id = 0;
         if ($obj == null) {
             $obj = [];
         } else {
             foreach ($obj as $key => $val) {
+                // test existing url
                 if ($val->url == $_REQUEST['url']) {
                     $url_exists = true;
-                    $req_id = $key;
+                    $req_id = $val->id;
                     break;
                 }
+                // get highest id
                 if ($val->id > $max_id) {
                     $max_id = $val->id;
                 }
             }
         }
 
-        $urlx = $url_exists ? 'TRUE' : 'FALSE';
-        echo 'URL EXISTS: ' . $urlx . '<br>';
-        echo 'MAX ID: ' . $max_id . '<br>';
-
         if ($url_exists) {
-            // return error
-            http_response_code(400);
-            $j['status'] = 'error';
-            $j['message'] = 'URL already exists';
-            $j['data'] = $req_id;
+            // return info
+            $stats->stats_existing_update();
+
+            http_response_code(200);
+            $j['status'] = 'success';
+            $j['message'] = 'URL already exists!';
+            $j['data'] = $url_prefix . $req_id;
             print json_encode($j);
         } else {
             // create new record
@@ -55,58 +134,61 @@ if ($_REQUEST) {
             $js['url'] = $_REQUEST['url'];
             array_push($obj, $js);
             $json = json_encode($obj);
-            $ret = file_put_contents('../data/shorten.json', $json);
+            $ret = file_put_contents($short_list, $json);
             // return new record
+            $stats->stats_saved_update();
+
             http_response_code(200);
             $j['status'] = 'success';
-            $j['message'] = 'new URL added';
+            $j['message'] = 'New URL added!';
             $j['data'] = $url_prefix . $max_id;
             print json_encode($j);
         }
     } else
-    if (isset($_REQUEST['surl'])) { // get original url
-        echo 'SHORTEN 2 ORIGINAL' . '<br>';
-        echo 'sURL: ' . $_REQUEST['surl'] . '<br>';
+    if (isset($_REQUEST['id'])) { // get original url
         // find pair
-        $req_id = 0;
         $req_url = '';
         if ($obj !== null) {
-            $req_id = substr($_REQUEST['surl'], strlen($url_prefix));
-            echo 'REQ_ID: ' . $req_id . '<br>';
             foreach ($obj as $key => $val) {
-                if ($req_id == $val->id) {
-                    var_dump($val);
+                if ($_REQUEST['id'] == $val->id) {
                     $req_url = $val->url;
-                    echo 'REQ_URL: ' . $req_url . '<br>';
                     break;
                 }
             }
         }
         if ($req_url !== '') {
             // return original url
+            $stats->stats_redirected_update();
+
             http_response_code(200);
             $j['status'] = 'success';
-            $j['message'] = 'original URL';
+            $j['message'] = 'Original URL';
             $j['data'] = $req_url;
             print json_encode($j);
         } else {
+            $stats->stats_notfound_update();
+
             http_response_code(400);
             $j['status'] = 'error';
-            $j['message'] = 'no URL found';
+            $j['message'] = 'Redirect for ' . $url_prefix . $_REQUEST['id'] . ' not found!';
             $j['data'] = '';
             print json_encode($j);
         }
     } else {
+        $stats->stats_badrequest_update();
+
         http_response_code(400);
         $j['status'] = 'error';
-        $j['message'] = 'irrelevant request';
+        $j['message'] = 'Irrelevant request!';
         $j['data'] = '';
         print json_encode($j);
     }
 } else {
+    $stats->stats_badrequest_update();
+
     http_response_code(400);
     $j['status'] = 'error';
-    $j['message'] = 'no request';
+    $j['message'] = 'No request!';
     $j['data'] = '';
     print json_encode($j);
 }

@@ -1,0 +1,43 @@
+@media screen and (min-width: 960px) {
+  form {
+    width: 50%;
+  }
+}
+@media screen and (max-width: 960px) {
+  form {
+    width: 100%;
+  }
+}
+form {
+  margin: auto;
+}
+
+input,
+#url-info,
+#surl-info {
+  width: 100%;
+  margin-top: 3px;
+  padding: 3px;
+}
+
+input[role="copy"],
+.info {
+  background-color: aqua;
+}
+
+input[role="request"],
+.success {
+  background-color: lime;
+}
+
+.error {
+  background-color: pink;
+}
+
+.right {
+  text-align: right;
+}
+
+.hidden {
+  display: none;
+}
