@@ -70,7 +70,6 @@ $stats->stats_load();
 if ($_REQUEST) {
     $stats->stats_used_update();
 
-    require('../config.php');
     $short_list = '../data/shorten.json';
     if (file_exists($short_list)) {
         $json = file_get_contents($short_list);
@@ -79,10 +78,8 @@ if ($_REQUEST) {
         file_put_contents($short_list, null);
     }
 
-    // trailing slash removal
-    if (strrpos($url_base, '/') === strlen($url_base) - 1) {
-        $url_base = substr($url_base, 0, strlen($url_base) - 1);
-    }
+    $url_array = parse_url(getenv('HTTP_REFERER'));
+    $url_base = $url_array['scheme'] . '://' . $url_array['host'];
     $url_prefix = $url_base . '/?id=';
     $message = '';
 

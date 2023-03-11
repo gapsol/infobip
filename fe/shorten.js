@@ -35,12 +35,12 @@ function hideInfo() {
   }
 }
 
-function shortenUrl(event) {
+function shortenUrl() {
   hideInfo();
   surl.value = "";
 
   const xhr = new XMLHttpRequest();
-  const url = "../be/?url=" + form.url.value;
+  const url = `../be/?url=${form.url.value}`;
   xhr.open("GET", url);
   xhr.responseType = "json";
 
@@ -116,11 +116,13 @@ function getStats() {
     let stats = document.getElementById("stats-info");
 
     if (xhr.status === 200) {
-      document.getElementById("s-badrequest").innerHTML = xhr.response.badrequest;
+      document.getElementById("s-badrequest").innerHTML =
+        xhr.response.badrequest;
       document.getElementById("s-existing").innerHTML = xhr.response.existing;
       document.getElementById("s-invalid").innerHTML = xhr.response.invalid;
       document.getElementById("s-notfound").innerHTML = xhr.response.notfound;
-      document.getElementById("s-redirected").innerHTML = xhr.response.redirected;
+      document.getElementById("s-redirected").innerHTML =
+        xhr.response.redirected;
       document.getElementById("s-saved").innerHTML = xhr.response.saved;
       document.getElementById("s-used").innerHTML = xhr.response.used;
       stats.classList.remove("hidden");
