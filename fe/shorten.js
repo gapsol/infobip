@@ -115,7 +115,7 @@ function getStats() {
   xhr.onload = () => {
     let stats = document.getElementById("stats-info");
 
-    if (xhr.status === 200) {
+    if (xhr.status === 200 && xhr.response) {
       document.getElementById("s-badrequest").innerHTML =
         xhr.response.badrequest;
       document.getElementById("s-existing").innerHTML = xhr.response.existing;

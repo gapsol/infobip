@@ -10,18 +10,37 @@ class Stats
         if (file_exists($this->stats_file)) {
             $json = file_get_contents($this->stats_file);
             $this->stats = json_decode($json);
-        } else {
-            $this->stats->used = 0;
-            $this->stats->saved = 0;
-            $this->stats->existing = 0;
-            $this->stats->invalid = 0;
-            $this->stats->redirected = 0;
-            $this->stats->notfound = 0;
-            $this->stats->badrequest = 0;
-            $this->stats_update();
         }
+        $this->init_stats();
     }
 
+    private function init_stats() {
+        if (!isset($this->stats)) {
+            $this->stats = json_decode('{}');
+        }
+        if (!isset($this->stats->used)) {
+            $this->stats->used = 0;
+        }
+        if (!isset($this->stats->saved)) {
+            $this->stats->saved = 0;
+        }
+        if (!isset($this->stats->existing)) {
+            $this->stats->existing = 0;
+        }
+        if (!isset($this->stats->invalid)) {
+            $this->stats->invalid = 0;
+        }
+        if (!isset($this->stats->redirected)) {
+            $this->stats->redirected = 0;
+        }
+        if (!isset($this->stats->notfound)) {
+            $this->stats->notfound = 0;
+        }
+        if (!isset($this->stats->badrequest)) {
+            $this->stats->badrequest = 0;
+        }
+        $this->stats_update();
+    }
     public function stats_used_update()
     {
         $this->stats->used++;

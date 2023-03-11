@@ -22,6 +22,7 @@ The shortener form contains:
   - *Nothing to copy!* if the Shortened input field is empty
   - *URL copied to clipboard!* if the copy function is successful
   - *Copying to clipboard failed!* if the copy function fails (it happen e.g. in case of nonsecure *http://* page)
+  - in case of failed copying user has to copy shortened URL manually
 
 **Function 2** - transcription of shortened URL to registered original URL and redirecting browser
 
@@ -47,7 +48,7 @@ Simple statistics are displayed as a part of UI (Function 1)
 **Data**
 - JSON files (shorten.json, stats.json)
 - placed in *data* directory
-- JSON files are created during the first use of appropriated part of the backend script
+- *data* directory and JSON files are created during the first use of appropriated parts of the backend script
 
 ## Server settings
 - use any webserver with PHP 5+ support
