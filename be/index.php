@@ -64,6 +64,9 @@ class Stats
     }
 }
 
+if (!file_exists('../data')) {
+    mkdir('../data');
+}
 $stats = new Stats();
 $stats->stats_load();
 
